@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "task": "Solve climate crisis",
+    "completed": "False"
+  },
+  {
+    "id": 2,
+    "task": "Give peace a chance",
+    "completed": "False"
+  },
+  {
+    "id": 3,
+    "task": "Read War and Peace",
+    "completed": "False"
+  }
+]

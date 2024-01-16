@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Todo List</title>
+    <link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>ToDo List</h1>
+        <ul>
+        {% for task in tasks %}
+            <li>
+                <input type="checkbox" name="done"
+                       {% if task['done'] %} checked {% endif %}
+                        disabled onchange="this.form.submit()">
+                <span {% if task['done'] %} style="text-decoration: line-through"
+
+                {% endif %}>
+                {{ task['task'] }} - {{ task['done'] }}</span>
+                <a href="{{ url_for('check'  , index=loop.index0 ) }}">check</a>
+                <a href="{{ url_for('edit'  , index=loop.index0 ) }}">edit</a>
+                <a href="{{ url_for('delete', index=loop.index0 ) }}">delete</a>
+                <p>loop.index0={{ loop.index0 }}</p>
+            </li>
+        {% endfor %}
+        </ul>
+        <form action="{{ url_for('add' )}}" method="POST">
+            <label for="task">task:</label>
+            <input type="text" name="task"><br>
+            <button type="submit">add task</button>
+        </form>
+
+    </div>
+
+
+</body>
+</html>
