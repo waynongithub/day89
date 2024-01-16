@@ -1,73 +1,73 @@
 from flask import Flask, render_template, request, redirect, url_for
+from flask_sqlalchemy import SQLAlchemy
 import json
 
-app = Flask(__name__)
-
-# based on NeuralNine Simple Todo List App in Flask - Beginner Project
+# based on NeuralNine Simple 'Todo List App in Flask - Beginner Project'
 #  https://www.youtube.com/watch?v=W1r8fVLS-gI
 
 # the database comes from Patrick Loeber https://www.youtube.com/watch?v=yKHJsLUENl0
 # Python Flask Beginner Tutorial - Todo App - Crash Course
 
-def load_tasks():
-    # Problems:
-    # 1. tasks = json.loads()  instead of tasks = json.loads(text)
-    # 2. the tasklist had values False not in quotes
-    # 3. maybe? there was a comma after the last property of a task
-    with open("static/tasks.txt") as f:
-        text = f.read()
-        # print(text)
-        tasklist = json.loads(text)
-        print(f"tasks[0]={tasklist[0]}")
-        print(f"tasks[0]task={tasklist[0]['task']}")
-        print(f"tasks[0]done={tasklist[0]['done']}")
+app = Flask(__name__)
 
-    return tasklist
+app.app_context().push() # this line was not in tutorial, but was given in the comments.
+# Is required with Flask-SQLAlchemy 3.0 and above
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
 
-tasks = [{"task": "sample todo", "done": False}]
+class Todo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    task = db.Column(db.String(100))
+    done = db.Column(db.Boolean)
 
 
-@app.route("/edit/<index>", methods=["GET", "POST"])
-def edit(index):
-    print(f"index={index}, {tasks}")
-    task = tasks[int(index)]
-    print(f"task={task}")
+@app.route("/update/<int:todo_id>", methods=["GET", "POST"])
+def update(todo_id):
+    print(f"todo_id={todo_id}")
+    todo = Todo.query.filter_by(id=todo_id).first()
     if request.method == "POST":
-        print(f"request.form['task']={request.form['task']}")
-        print(f"request.form.get('task')={request.form.get('task')}")
-        task['task'] = request.form['task']
+        todo.task = request.form['todo']
+        db.session.commit()
         return redirect( url_for('home'))
     else:
-        return render_template("edit.html", task=task, index=index)
+        return render_template("update.html", todo=todo, todo_id=todo_id)
 
 
-@app.route("/check/<int:index>")
-def check(index):
-    tasks[index]['done'] = not tasks[index]['done']
+@app.route("/check/<int:todo_id>")
+def check(todo_id):
+    todo = Todo.query.filter_by(id=todo_id).first()
+    todo.done = not todo.done
+    db.session.commit()
     return redirect( url_for('home'))
 
 
-@app.route("/delete/<int:index>")
-def delete(index):
-    del tasks[index]
+@app.route("/delete/<int:todo_id>")
+def delete(todo_id):
+    todo = Todo.query.filter_by(id=todo_id).first()
+    db.session.delete(todo)
+    db.session.commit()
     return redirect( url_for('home'))
 
 
 @app.route("/add", methods=["POST"])
 def add():
     if request.method == "POST":
-        tasks.append({
-            "task": request.form['task'],
-            "done": False
-        })
+        new_todo = Todo(task=request.form['task'], done=False)
+        db.session.add(new_todo)
+        db.session.commit()
         return redirect( url_for('home'))
+
 
 
 @app.route("/")
 def home():
-    return render_template("index.html", tasks=tasks)
+    todos = Todo.query.all()
+    return render_template("base.html", tasks=todos)
 
 
 if __name__ == '__main__':
+    db.create_all()
     app.run(debug=True, port=5001)

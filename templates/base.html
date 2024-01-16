@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Todo List</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.css">
+    <link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+    <div class="ui container">
+        <h1 class="ui center aligned header">ToDo List from database</h1>
+        {% for task in tasks %}
+        <div class="ui segment">
+            <p class="ui big header">{{ task.task }}</p>
+            {% if task.done == False %}
+                <span class="ui grey label">Not completed</span>
+            {% else %}
+                <span class="ui green label">Completed</span>
+            {% endif %}
+        <a class="ui blue button" href=" {{ url_for('check', todo_id=task.id) }}">Check</a>
+        <a class="ui blue button" href=" {{ url_for('update', todo_id=task.id) }}">Update</a>
+        <a class="ui blue button" href=" {{ url_for('delete', todo_id=task.id) }}">Delete</a>
+        </div>
+        {% endfor %}
+        <form class="ui form" action="{{ url_for('add' )}}" method="POST">
+            <label for="task">task:</label>
+            <input type="text" name="task"><br>
+            <button class="ui blue button" type="submit">add task</button>
+        </form>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.js"></script>
+</body>
+</html>
